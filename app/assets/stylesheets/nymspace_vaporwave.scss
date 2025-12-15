@@ -168,6 +168,38 @@ p, h1, h2, h3, h4, h5, h6, label {
   gap: 10px;
 }
 
+.nym-glyph {
+  shape-rendering: crispEdges;
+  image-rendering: pixelated;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(93, 224, 255, 0.35);
+}
+
+.nym-glyph--small {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+}
+
+.nym-glyph--message {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(93, 224, 255, 0.3);
+}
+
+.nym-tag {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-transform: lowercase;
+}
+
+.message-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .cloak-chip {
   display: inline-flex;
   align-items: center;
