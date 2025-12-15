@@ -1,0 +1,25 @@
+{
+  "name": "migrate-legacy-to-firestore",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "export": "ts-node src/index.ts export",
+    "import": "ts-node src/index.ts import",
+    "validate": "ts-node src/index.ts validate"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^12.1.1",
+    "pg": "^8.11.5",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.8",
+    "@types/pg": "^8.11.6",
+    "@types/yargs": "^17.0.32",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
