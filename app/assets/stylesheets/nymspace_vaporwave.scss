@@ -371,6 +371,13 @@ select.form-control:focus,
   color: var(--text);
 }
 
+.login-form {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glow);
+}
+
 .login-form a {
   color: var(--accent);
 }
