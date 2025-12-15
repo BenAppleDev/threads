@@ -1,19 +1,20 @@
 <div class="message-item message-item-extra<% if message.user.muted_in_room?(room) %> message-item-muted<% end %><% if defined?(current_user) && current_user.present? && current_user.id == message.user_id %> message-item-outgoing<% else %> message-item-incoming<% end %>" data-message-id="<%= message.id %>" data-user-id="<%= message.user.id %>">
   <div class="message-header dropdown">
-    <strong class="message-user dropdown-toggle" data-toggle="dropdown">
-      <%= message.user.nickname_in_room(room) %>
-    </strong>
+    <div class="message-identity dropdown-toggle" data-toggle="dropdown" role="button" tabindex="0">
+      <%= nym_glyph_svg(message.user, instance: room.instance, size: 18, css_class: 'nym-glyph nym-glyph--small nym-glyph--message') %>
+      <strong class="message-user nym-tag"><%= nym_tag(message.user, instance: room.instance) %></strong>
+    </div>
     <ul class="dropdown-menu">
       <li>
         <% unless message.user.muted_in_room?(room) %>
           <%= link_to mute_user_room_path(room, user_id: message.user), method: :post do %>
-            Mute <strong><%= message.user.nickname_in_room(room) %></strong> in this thread
+            Mute <strong><%= nym_tag(message.user, instance: room.instance) %></strong> in this thread
           <% end %>
         <% end %>
 
         <% if message.user.muted_in_room?(room) %>
           <%= link_to unmute_user_room_path(room, user_id: message.user), method: :post do %>
-            Unmute <strong><%= message.user.nickname_in_room(room) %></strong> in this thread
+            Unmute <strong><%= nym_tag(message.user, instance: room.instance) %></strong> in this thread
           <% end %>
         <% end %>
       </li>
