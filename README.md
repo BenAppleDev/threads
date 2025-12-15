@@ -32,3 +32,32 @@ To discuss current or potential uses, see our new [Threads forum](https://github
 ## License
 
 MIT
+
+## Modern Firebase v1
+
+A parallel Firebase/GCS implementation lives in the `apps/web`, `firebase`, and `functions` directories. Rails remains unchanged.
+
+## Legacy ➜ Firebase migration (v1.1)
+
+Use the TypeScript CLI in `scripts/migrate_legacy_to_firestore` to export legacy Postgres data, import it into the Firestore emulator (or production), and validate counts. See `docs/migration_v1_1.md` for prerequisites, commands, and data mapping notes.
+
+### Local quickstart
+
+1. Install dependencies:
+   ```bash
+   cd functions && npm install
+   cd ../apps/web && npm install
+   ```
+2. In `firebase/`, start the Emulator Suite (auth, firestore, functions):
+   ```bash
+   firebase emulators:start
+   ```
+3. In another terminal run the Next.js client:
+   ```bash
+   cd apps/web
+   cp .env.example .env
+   npm run dev
+   ```
+4. Visit `http://localhost:3000`, sign in anonymously, create/join rooms, and chat in real time. The callable `ensureNymProfile` sets your deterministic nym identity; Firestore rules enforce cloak mode and membership.
+
+See [`docs/modernization_v1.md`](docs/modernization_v1.md) for architecture details, rules, and seeding helpers.

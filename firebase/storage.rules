@@ -1,0 +1,13 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAuth() { return request.auth != null; }
+    function isMember(instanceId, roomId) {
+      return exists(/databases/(default)/documents/instances/$(instanceId)/rooms/$(roomId)/members/$(request.auth.uid));
+    }
+
+    match /instances/{instanceId}/rooms/{roomId}/attachments/{uid}/{fileName} {
+      allow read, write: if isAuth() && isMember(instanceId, roomId) && request.auth.uid == uid;
+    }
+  }
+}

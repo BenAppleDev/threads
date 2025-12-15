@@ -30,3 +30,16 @@ coverage
 
 .env
 config/database.yml
+
+# Node/Firebase artifacts
+node_modules
+apps/web/.next
+apps/web/.env
+apps/web/.turbo
+functions/lib
+functions/.env
+firebase-debug.log
+storage-debug.log
+firestore-debug.log
+scripts/migrate_legacy_to_firestore/out
+scripts/migrate_legacy_to_firestore/.env
