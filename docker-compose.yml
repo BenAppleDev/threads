@@ -9,7 +9,7 @@ services:
       - '.env'
 
   redis:
-    image: 'redis:4.0-alpine'
+    image: 'redis:7-alpine'
     command: redis-server
     volumes:
       - 'redis:/data'
@@ -24,6 +24,9 @@ services:
       - '1080:1080'
     volumes:
       - '.:/app'
+      - 'bundle_cache:/usr/local/bundle'
+    environment:
+      BUNDLE_PATH: /usr/local/bundle
     env_file:
       - '.env'
 
@@ -37,9 +40,13 @@ services:
       - '28080:28080'
     volumes:
       - '.:/app'
+      - 'bundle_cache:/usr/local/bundle'
+    environment:
+      BUNDLE_PATH: /usr/local/bundle
     env_file:
       - '.env'
 
 volumes:
   redis:
   postgres:
+  bundle_cache:
