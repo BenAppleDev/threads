@@ -37,10 +37,6 @@ MIT
 
 A parallel Firebase/GCS implementation lives in the `apps/web`, `firebase`, and `functions` directories. Rails remains unchanged.
 
-## Legacy ➜ Firebase migration (v1.1)
-
-Use the TypeScript CLI in `scripts/migrate_legacy_to_firestore` to export legacy Postgres data, import it into the Firestore emulator (or production), and validate counts. See `docs/migration_v1_1.md` for prerequisites, commands, and data mapping notes.
-
 ### Local quickstart
 
 1. Install dependencies:
