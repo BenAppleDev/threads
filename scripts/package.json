@@ -1,0 +1,10 @@
+{
+  "name": "threads-modern-scripts",
+  "private": true,
+  "scripts": {
+    "seed": "node seed_demo.ts"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.2.0"
+  }
+}
