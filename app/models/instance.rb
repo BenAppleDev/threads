@@ -10,7 +10,11 @@ class Instance < ApplicationRecord
   validates :title, presence: true, length: { maximum: 1000 }
 
   def rooms_sorted_by_last_message
-    rooms.includes(:messages).order('messages.created_at DESC NULLS LAST')
+    rooms
+      .left_joins(:messages)
+      .select('rooms.*, MAX(messages.created_at) AS last_message_at')
+      .group('rooms.id')
+      .order('last_message_at DESC NULLS LAST, rooms.created_at DESC')
   end
 
   def self.all_for_user(user)

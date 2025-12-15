@@ -109,35 +109,32 @@ class InstancesController < ApplicationController
   end
 
   def export
-    content = ''
-
-    content += @instance.title
-
-    @instance.rooms_sorted_by_last_message.each do |room|
-      latest_message_date = room.messages
-                                .order(:created_at)
-                                .last
-                                &.created_at
-                                &.to_formatted_s(:long_ordinal)
-
-      content += "#{room.title} "
-      content += "(#{room.messages.count} #{'reply'.pluralize(room.messages.count)}"
-      content += " / last update #{latest_message_date}" if latest_message_date
-      content += ")\n"
-
-      room.messages.order(:created_at).each do |message|
-        message_content = message.content.delete("\r\n\\")
-        content += "#{message.user.nickname_in_room(room)}: #{message_content}"
-        content += "\n"
-      end
-
-      content += "\n"
-    end
-
     filename = @instance.title.tr(' ', '_')
-    send_data content,
-              type: 'text',
-              disposition: "attachment; filename=#{filename}_export.txt"
+
+    headers['Content-Type'] = 'text/plain'
+    headers['Content-Disposition'] = "attachment; filename=#{filename}_export.txt"
+
+    self.response_body = Enumerator.new do |output|
+      output << "#{@instance.title}\n\n"
+
+      @instance.rooms_sorted_by_last_message.includes(messages: :user).each do |room|
+        messages = room.messages.includes(:user).order(:created_at)
+        message_count = messages.size
+        latest_message_date = messages.last&.created_at&.to_formatted_s(:long_ordinal)
+
+        output << room.title
+        output << " (#{message_count} #{'reply'.pluralize(message_count)}"
+        output << " / last update #{latest_message_date}" if latest_message_date
+        output << ")\n"
+
+        messages.each do |message|
+          message_content = message.content.delete("\r\n\\")
+          output << "#{message.user.nickname_in_room(room)}: #{message_content}\n"
+        end
+
+        output << "\n"
+      end
+    end
   end
 
   private

@@ -28,42 +28,55 @@ class User < ApplicationRecord
     return 'OP' if room.owner_id == id
     return ENV['VICTORIOUSBORN_NICKNAME'] if ENV['VICTORIOUSBORN_NICKNAME'].present? && username == 'victoriousBorn'
 
-    in_room_user_nicknames = RoomUserNickname.includes(:user).where(room: room)
-    nickname_in_room = in_room_user_nicknames.find { |room_user_nickname| room_user_nickname.user == self }
+    nickname_record = room.room_user_nicknames.find { |room_user_nickname| room_user_nickname.user_id == id } if room.room_user_nicknames.loaded?
+    nickname_record ||= room.room_user_nicknames.find_by(user_id: id)
 
-    return nickname_in_room.nickname unless nickname_in_room.nil?
+    return nickname_record.nickname if nickname_record
 
-    nickname_in_room = loop do
-      nickname = [
-        Faker::Space.planet,
-        Faker::Space.moon,
-        Faker::Space.galaxy,
-        Faker::Space.star,
-        Faker::TvShows::Stargate.planet,
-        Faker::Movies::StarWars.planet,
-        Faker::Games::Witcher.location
-      ].sample
+    RoomUserNickname.transaction do
+      room.room_user_nicknames.lock
 
-      break RoomUserNickname.create!(
+      nickname_record = room.room_user_nicknames.find_by(user_id: id)
+      return nickname_record.nickname if nickname_record
+
+      existing_names = room.room_user_nicknames.pluck(:nickname)
+      nickname = generate_nickname(existing_names)
+
+      room.room_user_nicknames.create!(
         user: self,
         nickname: nickname,
         room: room
-      ) unless RoomUserNickname.exists?(
-        room: room,
-        nickname: nickname
-      )
+      ).nickname
     end
-
-    nickname_in_room.nickname
   end
 
   def muted_in_room?(room)
-    @muted_in_room_all ||= MutedRoomUser.includes(:user).where(room: room)
-    @muted_in_room_all.find { |muted_in_room| muted_in_room.user == self }
-                      .present?
+    @muted_in_room ||= {}
+    @muted_in_room[room.id] ||= MutedRoomUser.exists?(room: room, user: self)
   end
 
   private
+
+  def generate_nickname(existing_names)
+    candidates = [
+      Faker::Space.planet,
+      Faker::Space.moon,
+      Faker::Space.galaxy,
+      Faker::Space.star,
+      Faker::TvShows::Stargate.planet,
+      Faker::Movies::StarWars.planet,
+      Faker::Games::Witcher.location
+    ].compact
+
+    candidates.shuffle.each do |candidate|
+      return candidate unless existing_names.include?(candidate)
+    end
+
+    loop do
+      fallback = "Traveler-#{SecureRandom.hex(3)}"
+      return fallback unless existing_names.include?(fallback)
+    end
+  end
 
   def set_default_role
     unless roles.include?(Role.anonymous)
