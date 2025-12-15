@@ -31,7 +31,7 @@ class MessagesController < ApplicationController
 
       head :ok
     else
-      render json: message.errors.messages, status: :unprocessable_enity
+      render json: message.errors.messages, status: :unprocessable_entity
     end
   end
 
