@@ -11,11 +11,14 @@
           </a>
           <h2 class="funny-red-font room-chat-header-title">Active thread</h2>
           <h5 class="funny-red-font room-chat-header-subtitle">Only the replies to the one thread you selected</h5>
+          <div class="room-chat-meta">
+            <span class="cloak-chip" title="Anonymous by design">Cloak: ON</span>
+          </div>
         </div>
 
         <div class="message-area<%= ' message-area-editor' if can?(:update, @room) %>">
           <% @messages.each do |message| %>
-            <%= render 'messages/message', message: message, room: @room %>
+            <%= render 'messages/message', message: message, room: @room, current_user: current_or_guest_user %>
           <% end %>
         </div>
 
