@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function membershipDoc(instanceId, roomId) {
+      return get(/databases/$(database)/documents/instances/$(instanceId)/rooms/$(roomId)/members/$(request.auth.uid));
+    }
+
+    function isMember(instanceId, roomId) {
+      return membershipDoc(instanceId, roomId).exists();
+    }
+
+    function roleFor(instanceId, roomId) {
+      return membershipDoc(instanceId, roomId).data.role;
+    }
+
+    function isModAdmin(instanceId, roomId) {
+      return roleFor(instanceId, roomId) in ['mod', 'admin'];
+    }
+
+    function isMuted(instanceId, roomId) {
+      let doc = membershipDoc(instanceId, roomId);
+      return doc.exists() && doc.data.mutedUntil != null && request.time < doc.data.mutedUntil;
+    }
+
+    function isLocked(instanceId, roomId) {
+      let room = get(/databases/$(database)/documents/instances/$(instanceId)/rooms/$(roomId));
+      return room.exists() && room.data.locked == true;
+    }
+
+    function hasForbiddenIdentityFields() {
+      let forbidden = ['email', 'username', 'realName', 'displayName'];
+      return request.resource.data.keys().hasAny(forbidden);
+    }
+
+    match /instances/{instanceId} {
+      allow read, create: if isAuth();
+      allow update, delete: if isAuth();
+
+      match /users/{uid} {
+        allow read, write: if isAuth() && request.auth.uid == uid;
+      }
+
+      match /rooms/{roomId} {
+        allow read: if isAuth();
+        allow create: if isAuth();
+        allow update, delete: if isAuth();
+
+        match /members/{uid} {
+          allow read: if isAuth() && request.auth.uid == uid || isModAdmin(instanceId, roomId);
+          allow create: if isAuth() && request.auth.uid == uid;
+          allow update, delete: if isAuth() && (request.auth.uid == uid || isModAdmin(instanceId, roomId));
+        }
+
+        match /messages/{messageId} {
+          allow read: if isAuth() && isMember(instanceId, roomId);
+
+          allow create: if isAuth()
+            && isMember(instanceId, roomId)
+            && !isMuted(instanceId, roomId)
+            && (!isLocked(instanceId, roomId) || isModAdmin(instanceId, roomId))
+            && !hasForbiddenIdentityFields();
+
+          allow update, delete: if isAuth() && isModAdmin(instanceId, roomId);
+        }
+      }
+    }
+  }
+}
